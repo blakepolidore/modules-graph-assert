@@ -7,6 +7,7 @@ import org.gradle.api.GradleException
 class OnlyAllowedAssert(
   private val allowedDependencies: Array<String>,
   private val aliasMap: Map<String, String> = emptyMap(),
+  private val allowedViolations: Map<String, List<String>> = emptyMap()
 ) : GraphAssert {
   override fun assert(dependencyGraph: DependencyGraph) {
     val matchers = allowedDependencies.map { Parse.matcher(it) }
@@ -14,6 +15,10 @@ class OnlyAllowedAssert(
     val disallowedDependencies = dependencyGraph.dependencyPairs()
       .map { aliasMap.mapAlias(it) }
       .filterNot { dependency -> matchers.any { it.matches(dependency.pairToAssert()) } }
+      .filterNot { dependency ->
+        val pair = dependency.pairToAssert()
+        allowedViolations[pair.first]?.contains(pair.second) == true
+      }
       .map { it.assertDisplayText() }
 
     if (disallowedDependencies.isNotEmpty()) {

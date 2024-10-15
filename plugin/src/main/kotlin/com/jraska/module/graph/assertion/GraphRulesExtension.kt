@@ -6,6 +6,7 @@ open class GraphRulesExtension {
   var allowed = emptyArray<String>() // each allowance in format "regexp -> regexp" e.g.: ":feature-[a-z]* -> :forbidden-lib"
   var configurations: Set<String> = Api.API_IMPLEMENTATON_CONFIGURATIONS
   var assertOnAnyBuild: Boolean = false
+  var allowedViolations: Map<String, List<String>> = emptyMap()
 
   internal fun shouldAssertHeight() = maxHeight > 0
 
