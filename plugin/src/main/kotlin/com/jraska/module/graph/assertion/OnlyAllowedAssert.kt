@@ -13,13 +13,13 @@ class OnlyAllowedAssert(
     val matchers = allowedDependencies.map { Parse.matcher(it) }
 
     val disallowedDependencies = dependencyGraph.dependencyPairs()
+        .asSequence()
+        .filterNot { pair ->
+          allowedViolations[pair.first]?.contains(pair.second) == true
+        }
       .map { aliasMap.mapAlias(it) }
       .filterNot { dependency -> matchers.any { it.matches(dependency.pairToAssert()) } }
-      .filterNot { dependency ->
-        val pair = dependency.pairToAssert()
-        allowedViolations[pair.first]?.contains(pair.second) == true
-      }
-      .map { it.assertDisplayText() }
+      .map { it.assertDisplayText() }.toList()
 
     if (disallowedDependencies.isNotEmpty()) {
       val allowedRules = allowedDependencies.joinToString(", ") { "'$it'" }
